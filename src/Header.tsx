@@ -1,23 +1,32 @@
 import { SetStateAction, Dispatch } from "react";
-
-type AddRefFunction = (refElement: HTMLDivElement | null|undefined) => void;
+type AddRefFunction = (refElement: HTMLDivElement | null | undefined) => void;
 
 function Header({
-  setVision,
+  setDataObject,
+  dataObject,
   index,
-  setIndex,
   text,
-  setHeader,
   headerIndex,
   addref,
 }: {
-  setVision: Dispatch<SetStateAction<boolean>>;
+  setDataObject: Dispatch<
+    SetStateAction<{
+      header: string;
+      index: number;
+      vision: boolean;
+    }>
+  >;
+  dataObject: {
+    header: string;
+    index: number;
+    vision:boolean;
+  };
   index: SetStateAction<number | null>;
-  setIndex: Dispatch<SetStateAction<number | null>>;
-  text:string;
-  setHeader: Dispatch<SetStateAction<null | string>>;
+
+  text: string;
+
   headerIndex: number;
- addref:AddRefFunction
+  addref: AddRefFunction;
 }) {
   return (
     <div>
@@ -25,13 +34,17 @@ function Header({
         className="border-2  border-black p-3"
         ref={addref}
         onClick={() => {
-          setHeader(text);
-          console.log(index, "hed");
-          setIndex(headerIndex);
+          const data: {
+            header: string;
+            index: number;
+            vision: false|boolean;
+          } = { header: text, index: headerIndex, vision: false };
+          setDataObject(data);
+
           {
             headerIndex === index
-              ? setVision((prev: boolean) => !prev)
-              : setVision(true);
+              ? setDataObject({ ...data, vision: !dataObject.vision })
+              : setDataObject({ ...data, vision: true });
           }
         }}
       >
