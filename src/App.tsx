@@ -1,28 +1,43 @@
-import { useState, useRef} from "react";
+import { useState, useRef, useCallback } from "react";
 
 import "./index.css";
 import Header from "./Header";
 import PopUp from "./PopUp";
 
 function App() {
-interface DataObject {
-    header: string;
-    index: number;
-    vision: boolean;
+  interface popupProperties {
+    content: string;
+    coords: { top: number; left: number };
+    visible: boolean;
   }
 
-  const [dataObject, setDataObject] = useState<DataObject>({
-    header: "",
-    index: 0,
-    vision: false,
+  const [popupProperties, setPopupProperties] = useState<popupProperties>({
+    content: "",
+    coords: { top: 0, left: 0 },
+    visible: false,
   });
 
-  const headers = ["email", "Name", "Phone", "Contacts"];
+  const headers: string[] = ["email", "Name", "Phone", "Contacts"];
 
-  const ref = useRef<(HTMLDivElement | undefined)[]>([]);
+  const handleHeaderClick = useCallback(
+    (ref: React.RefObject<HTMLDivElement> | null, header: string) => {
+      if (ref?.current) {
+        const rect = ref.current.getBoundingClientRect();
 
-  const left: number | undefined = ref.current[dataObject.index]?.offsetLeft;
-  const top: number | undefined = ref.current[dataObject.index]?.offsetHeight;
+        const { height, x } = rect;
+
+        setPopupProperties((prev) => {
+          return {
+            content: `${header}`,
+            coords: { top: height + 1, left: x },
+            visible:
+              prev.content === ref.current?.innerText ? !prev.visible : true,
+          };
+        });
+      }
+    },
+    []
+  );
 
   return (
     <div className="flex-col  items-center">
@@ -32,25 +47,20 @@ interface DataObject {
             {headers.map((header, headerIndex) => {
               return (
                 <Header
-                  setDataObject={setDataObject}
-                  dataObject={dataObject}
-                  index={dataObject.index}
-                  text={header}
+                  header={header}
                   key={headerIndex}
-                  headerIndex={headerIndex}
-                  addref={(refElement: HTMLDivElement | undefined | null) => {
-                    if (refElement) ref.current[headerIndex] = refElement;
-                  }}
+                  handleHeaderClick={handleHeaderClick}
                 />
               );
             })}
           </div>
-          <PopUp
-            header={dataObject.header}
-            left={left}
-            vision={dataObject.vision}
-            top={top}
-          />
+          {popupProperties.visible ? (
+            <PopUp
+              header={popupProperties.content}
+              left={popupProperties.coords.left}
+              top={popupProperties.coords.top}
+            />
+          ) : null}
         </div>
       </div>
     </div>
